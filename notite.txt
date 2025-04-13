@@ -1,0 +1,577 @@
+Deci eu incerc sa creez la sisteme de gestiune a bazelor de date, un sistem de gestiune a evenimentelor de tip talks...
+
+Am urmatoarele tabele, dar tine cont ca nu am stabilit inca relatiile, nici foreign-keyurile.. nimic!!
+
+RECENZII: id_recenzie, rating, data, text
+DISCURSURI:id_discurs, titlu, durata
+VORBITORI: id_vorbitor, nume, prenume, email, telefon
+CAZARI: id_cazare, tip, adresa, numar_locuri, poate oras?
+GRUPURI: id_grup, nume, oras
+EVENIMENTE: id_eveniment, nume, data_inceput, data_sfarsit
+SPONSORI: id_sponsor, nume, suma
+PARTICIPANTI: id_participant, nume, prenume, email
+FACTURI: id_factura, suma, descriere
+LOCATII: id_locatie, nume, capacitate
+
+Bun. La momentul actual, sunt in stadiul in care stabilesc relatiile, tabelele asociatie, cheile straine etc...
+
+Uite care este logica sistemului:
+
+Un GRUP organizeaza un eveniment. Acest eveniment are loc intr-o LOCATIE, are SPONSORI si FACTURI.
+de asemenea, la acest eveniment asista PARTICIPANTI.
+
+In cadrul EVENIMENTULUI, au loc DISCURSURI tinute de VORBITORI, care sunt gazduiti la CAZARI.
+DISCURSURILE sunt niste schite generale, din care VORBITORUL isi alege schita/discursul dorit.
+Unui anumit discurs tinut de un anumit vorbitor in cadrul unui anumit eveniment, se poate acorda o RECENZIE de catre un PARTICIPANT.
+
+acum niste informatii aditionale:
+un grup poate organiza mai multe evenimente, dar un eveniment poate fi organizat de un singur grup.
+un eveniment are loc intr-o singura locatie, dar o locatie poate gazdui mai multe evenimente de-a lungul timpului.
+un eveniment poate avea mai multi sponsori, iar un sponsor poate sustine mai multe evenimente de-a lungul timpului.
+un eveniment are o singura factura, iar o factura ii este atribuita unui singur eveniment.
+un eveniment poate avea mai multi participanti, iar un participant poate participa la mai multe evenimente de-a lungul timpului.
+
+un vorbitor poate tine mai multe discursuri, iar un discurs poate fi tinut de mai multi vorbitori.
+un eveniment poate avea mai multe discursuri si vorbitori , iar un discurs si un vorbitor poate avea loc la mai multe evenimente
+un vorbitor este gazduit la o cazare, iar o cazare poate gazdui mai multi vorbitori.
+atunci cand un vorbitor tine un discurs, participantul poate oferi o recenzie. Un vorbitor si un discurs(ma gandesc la un tabel asociativ vorbitor_discurs) pot avea mai multe recenzii, dar o recenzie poate fi atribuita unui singur vorbitor si discurs
+
+
+La eveniment adaug id_grup si id_cazare, id_locatie
+
+
+
+
+
+
+
+un vorbitor poate tine mai multe discursuri
+un discurs poate fi tinut de mai multi vorbitori
+
+recenzia se aplica asupra unui vorbitor_discurs
+
+un eveniment poate avea mai multe facturi
+o factura poate apartine unui singru eveniment
+
+un eveniment poate avea loc intr o locatie
+o locatie poate gazdui mai multe evenimente
+
+un eveniment poate avea mai multi sponsori
+un sponosor poate sustine mai multe evenimente
+
+un eveniment poate avea mai multi participanti
+un participant participa la mai multe evenimente
+
+un vorbitor poate fi gazduit la o cazare
+o cazare poate gazdui mai multi vorbitori
+
+un eveniment este hostuit de un grup
+un grup poate hostui mai multe evenimente
+
+
+CAZARI: id_cazare(PK), tip, adresa, numar_locuri
+VORBITORI: id_vorbitori(PK), nume, prenume, email, telefon
+LOCATII: id_locatie(PK), nume, capacitate
+EVENIMENTE: id_eveniment(PK), id_grup(FK1), id_cazare(FK2), id_locatie(FK3), nume, data_inceput, data_sfarsit
+SPONSORI: id_sponsor(PK), nume
+DISCURSURI: id_discurs(PK), titlu, durata
+FACTURI: id_factura(PK), id_eveniment(FK1), suma, descriere
+GRUPURI: id_grup(PK), nume, oras
+PARTICIPANTI: id_participant (PK), id_eveniment(FK1), nume, prenume, email
+RECENZII: id_recenzie (PK), id_participant(FK1), (id_vorbitor, id_discurs, id_eveniment) (FK2), rating, data, text
+VORBITORI_DISCURSURI_EVENIMENTE: id_vorbitor(PK, FK1), id_discurs(PK, FK2), id_eveniment(PK, FK3)
+VORBITORI_CAZARI: id_vorbitor(PK,FK1), id_cazare(PK, FK2)
+EVENIMENTE_SPONSORI: id_eveniment(PK, FK1), id_sponsor(PK, FK2), suma
+
+
+
+
+
+
+
+
+
+-------------VORBITORI---------------
+--VORBITORI: id_vorbitori(PK), nume, prenume, email, telefon
+CREATE SEQUENCE vorbitori_seq
+START WITH 1000;
+
+CREATE TABLE VORBITORI
+(
+    id_vorbitor NUMBER(5) CONSTRAINT pkey_vorbitor PRIMARY KEY,
+    nume VARCHAR(100) CONSTRAINT nume_vorbitor NOT NULL,
+    prenume VARCHAR(100) CONSTRAINT prenume_vorbitor NOT NULL,
+    email VARCHAR(100) CONSTRAINT email_vorbitor NOT NULL,
+    telefon VARCHAR(20) CONSTRAINT telefon_vorbitor NOT NULL
+);
+
+INSERT INTO VORBITORI
+VALUES(vorbitori_seq.nextval, 'Pana', 'Marian', 'panamarian@gmail.com', '+40734543127');
+
+INSERT INTO VORBITORI
+VALUES(vorbitori_seq.nextval, 'Armeanca', 'Elis', 'ellisarm@gmail.com', '+40784065701');
+
+INSERT INTO VORBITORI
+VALUES(vorbitori_seq.nextval, 'Uta', 'Catalin', 'catau@gmail.com', '+40738885577');
+
+INSERT INTO VORBITORI
+VALUES(vorbitori_seq.nextval, 'Balea', 'Calin', 'balincalea@gmail.com', '+40766909023');
+
+INSERT INTO VORBITORI
+VALUES(vorbitori_seq.nextval, 'Coman', 'Florinel', 'fcoman7@gmail.com', '+40734999777');
+
+commit;
+SELECT * FROM VORBITORI;
+
+
+-----------CAZARI----------
+--CAZARI: id_cazare(PK), tip, adresa, numar_locuri
+CREATE SEQUENCE cazari_seq
+START WITH 2000;
+
+CREATE TABLE CAZARI
+(
+    id_cazare NUMBER(5) CONSTRAINT pkey_cazare PRIMARY KEY,
+    tip VARCHAR(100) CONSTRAINT tip_cazare NOT NULL,
+    adresa VARCHAR(100) CONSTRAINT adresa_cazare NOT NULL,
+    numar_locuri NUMBER(4) CONSTRAINT numar_locuri_cazare NOT NULL
+);
+
+INSERT INTO CAZARI
+VALUES (cazari_seq.nextval, 'Hotel', 'Nicolae Balcescu 4, Bucuresti 1, Romania', 3200);
+
+INSERT INTO CAZARI
+VALUES (cazari_seq.nextval, 'Vila', 'Intrarea Sectorului 8, Bucuresti 3, Romania', 16);
+
+INSERT INTO CAZARI
+VALUES (cazari_seq.nextval, 'Apartament', 'Bulevardul Eroilor 15, bloc 35, ap.98, Cluj-Napoca , Romania', 8);
+
+INSERT INTO CAZARI
+VALUES (cazari_seq.nextval, 'Vila', 'Strada Victoriei 23, Timisoara , Romania', 10);
+
+INSERT INTO CAZARI
+VALUES (cazari_seq.nextval, 'Hotel', 'Strada Stadionului 1, Cluj-Napoca, Romania', 3200);
+
+commit;
+SELECT * FROM CAZARI;
+
+---------LOCATII----------
+--LOCATII: id_locatie(PK), nume, capacitate
+CREATE SEQUENCE locatii_seq
+START WITH 3000;
+
+CREATE TABLE LOCATII
+(
+    id_locatie NUMBER(5) CONSTRAINT pkey_locatie PRIMARY KEY,
+    nume VARCHAR(100) CONSTRAINT nume_locatie NOT NULL,
+    capacitate NUMBER(5) CONSTRAINT capacitate_locatie NOT NULL
+);
+
+INSERT INTO LOCATII
+VALUES (locatii_seq.nextval, 'Romexpo, Bucuresti', 10000  );
+
+INSERT INTO LOCATII
+VALUES (locatii_seq.nextval, 'Aula Magna UPB, Bucuresti', 1000  );
+
+INSERT INTO LOCATII
+VALUES (locatii_seq.nextval, 'BT Arena, Cluj-Napoca', 10000  );
+
+INSERT INTO LOCATII
+VALUES (locatii_seq.nextval, 'Auditorium Maximum, Cluj-Napoca', 800  );
+
+INSERT INTO LOCATII
+VALUES (locatii_seq.nextval, 'Sala Polivalenta, Timisoara', 8000  );
+
+commit;
+SELECT * FROM LOCATII;
+
+------GRUPURI--------
+--GRUPURI: id_grup(PK), nume, oras
+CREATE SEQUENCE grupuri_seq
+START WITH 4000;
+
+CREATE TABLE GRUPURI
+(
+    id_grup NUMBER(5) CONSTRAINT pkey_grup PRIMARY KEY,
+    nume VARCHAR(100) CONSTRAINT nume_grup NOT NULL,
+    oras VARCHAR(100) CONSTRAINT oras_grup NOT NULL
+);
+
+INSERT INTO GRUPURI
+VALUES (grupuri_seq.nextval, 'Bucuresti Tech Talks', 'Bucuresti'  );
+
+INSERT INTO GRUPURI
+VALUES (grupuri_seq.nextval, 'Timisoara Dev Community', 'Timisoara'  );
+
+INSERT INTO GRUPURI
+VALUES (grupuri_seq.nextval, 'Bucuresti Ted Talks', 'Bucuresti'  );
+
+INSERT INTO GRUPURI
+VALUES (grupuri_seq.nextval, 'Open-Mind Cluj', 'Cluj-Napoca'  );
+
+INSERT INTO GRUPURI
+VALUES (grupuri_seq.nextval, 'Growup Meetings Cluj-Napoca', 'Cluj-Napoca'  );
+
+commit;
+SELECT * FROM GRUPURI;
+
+---------DISCURSURI-------------
+--DISCURSURI: id_discurs(PK), titlu, durata
+
+CREATE SEQUENCE discursuri_seq
+START WITH 5000;
+
+CREATE TABLE DISCURSURI
+(
+    id_discurs NUMBER(5) CONSTRAINT pkey_discurs PRIMARY KEY,
+    titlu VARCHAR(255) CONSTRAINT titlu_discurs NOT NULL,
+    durata NUMBER(4) CONSTRAINT durata_discurs NOT NULL --minute
+);
+
+INSERT INTO DISCURSURI
+VALUES (discursuri_seq.nextval, 'Cum sa imi gestionez timpul?', 45 );
+
+INSERT INTO DISCURSURI
+VALUES (discursuri_seq.nextval, 'Cum raman up-to-date cu industria?', 30 );
+
+INSERT INTO DISCURSURI
+VALUES (discursuri_seq.nextval, 'Gasirea satisfactiei in munca. Cum?', 50 );
+
+INSERT INTO DISCURSURI
+VALUES (discursuri_seq.nextval, 'Tehnici de dezvoltare web', 60 );
+
+INSERT INTO DISCURSURI
+VALUES (discursuri_seq.nextval, 'Sa ne propunem obiective personale!', 45 );
+
+commit;
+SELECT * from DISCURSURI;
+
+
+--------------EVENIMENTE---------------
+--EVENIMENTE: id_eveniment(PK), id_grup(FK1), id_cazare(FK2), 
+--            id_locatie(FK3), nume, data_inceput, data_sfarsit
+
+CREATE SEQUENCE evenimente_seq
+START WITH 6000;
+
+CREATE TABLE EVENIMENTE
+(
+    id_eveniment NUMBER(5) CONSTRAINT pkey_eveniment PRIMARY KEY,
+    nume VARCHAR(150) CONSTRAINT nume_eveniment NOT NULL,
+    data_inceput DATE CONSTRAINT data_inceput_eveniment NOT NULL,
+    data_sfarsit DATE CONSTRAINT data_sfarsit_eveniment NOT NULL,
+    id_grup NUMBER(5),
+        CONSTRAINT fk_ev_grup FOREIGN KEY(id_grup) REFERENCES GRUPURI(id_grup),
+    id_cazare NUMBER(5),
+        CONSTRAINT fk_ev_cazare FOREIGN KEY(id_cazare) REFERENCES CAZARI(id_cazare)
+);
+
+INSERT INTO EVENIMENTE
+VALUES (evenimente_seq.nextval, 'Conferinta de TECH #1 aprilie 2025', 
+        TO_DATE('15-04-2025','dd-mm-yyyy'), 
+        TO_DATE('15-04-2025','dd-mm-yyyy'), 4000, 2000  );
+
+INSERT INTO EVENIMENTE
+VALUES (evenimente_seq.nextval, 'Conferinta anuala DEV 2025 ', 
+        TO_DATE('25-04-2025','dd-mm-yyyy'), 
+        TO_DATE('26-04-2025','dd-mm-yyyy'), 4001, 2003  );
+        
+INSERT INTO EVENIMENTE
+VALUES (evenimente_seq.nextval, 'TED TALKS SESSION#1 2025', 
+        TO_DATE('01-02-2025','dd-mm-yyyy'), 
+        TO_DATE('01-02-2025','dd-mm-yyyy'), 4002, 2001 );
+        
+INSERT INTO EVENIMENTE
+VALUES (evenimente_seq.nextval, 'Training dezvoltare personala martie 2025', 
+        TO_DATE('15-03-2025','dd-mm-yyyy'), 
+        TO_DATE('15-03-2025','dd-mm-yyyy'), 4003, 2002  );
+        
+INSERT INTO EVENIMENTE
+VALUES (evenimente_seq.nextval, 'Seminar arta conversatiei', 
+        TO_DATE('02-05-2025','dd-mm-yyyy'), 
+        TO_DATE('04-05-2025','dd-mm-yyyy'), 4004, 2004  );
+
+
+commit;
+SELECT * FROM evenimente;
+
+-------SPONSORI-----------
+--SPONSORI: id_sponsor(PK), id_eveniment(FK1), nume
+
+CREATE SEQUENCE sponsori_seq
+START WITH 7000;
+
+CREATE TABLE SPONSORI
+(
+    id_sponsor NUMBER(5) CONSTRAINT pkey_sponsor PRIMARY KEY,
+    nume VARCHAR(150) CONSTRAINT nume_sponsor NOT NULL
+);
+
+INSERT INTO SPONSORI
+VALUES (sponsori_seq.nextval, 'Endava' );
+
+INSERT INTO SPONSORI
+VALUES (sponsori_seq.nextval, 'KPMG' );
+
+INSERT INTO SPONSORI
+VALUES (sponsori_seq.nextval, 'MIcrosoft' );
+
+INSERT INTO SPONSORI
+VALUES (sponsori_seq.nextval, 'Google' );
+
+INSERT INTO SPONSORI
+VALUES (sponsori_seq.nextval, 'ING Bank' );
+
+commit;
+select * from sponsori;
+
+
+---------------FACTURI----------------
+--FACTURI: id_factura(PK), id_eveniment(FK1), suma, descriere
+
+CREATE SEQUENCE facturi_seq 
+START WITH 8000;
+
+CREATE TABLE FACTURI
+(
+    id_factura NUMBER(5) CONSTRAINT pkey_factura PRIMARY KEY,
+    suma NUMBER(7) CONSTRAINT suma_factura NOT NULL,
+    descriere VARCHAR(255) CONSTRAINT descriere_factura NOT NULL,
+    id_eveniment NUMBER(5),
+        CONSTRAINT fk_fac_eveniment FOREIGN KEY(id_eveniment) REFERENCES EVENIMENTE(id_eveniment)
+);
+
+INSERT INTO FACTURI
+VALUES (facturi_seq.nextval, 65000, 'Chirie locatie', 6000);
+
+INSERT INTO FACTURI
+VALUES (facturi_seq.nextval, 6500, 'Utilitati locatie', 6001);
+
+INSERT INTO FACTURI
+VALUES (facturi_seq.nextval, 10000, 'Plata cazare', 6002);
+
+INSERT INTO FACTURI
+VALUES (facturi_seq.nextval, 80000, 'Chirie locatie', 6003);
+
+INSERT INTO FACTURI
+VALUES (facturi_seq.nextval, 99990, 'Chirie echipamente audio-video', 6004);
+
+commit;
+select * from facturi;
+
+
+
+-----PARTICIPANTI------
+--PARTICIPANTI: id_participant (PK), id_eveniment(FK1), nume, prenume, email
+
+CREATE SEQUENCE participanti_seq
+START WITH 9000;
+
+CREATE TABLE PARTICIPANTI
+(
+    id_participant NUMBER(5) CONSTRAINT pkey_participant PRIMARY KEY,
+    nume VARCHAR(150) CONSTRAINT nume_participant NOT NULL,
+    prenume VARCHAR(150) CONSTRAINT prenume_participant NOT NULL,
+    email VARCHAR(150) CONSTRAINT email_participant NOT NULL,
+    id_eveniment NUMBER(5),
+        CONSTRAINT fk_part_eveniment FOREIGN KEY(id_eveniment) REFERENCES EVENIMENTE(id_eveniment)
+);
+
+INSERT INTO PARTICIPANTI
+VALUES (participanti_seq.nextval, 'Armeanca', 'Daniela', 'dana_arm@yahoo.com', 6000);
+
+INSERT INTO PARTICIPANTI
+VALUES (participanti_seq.nextval, 'Armeanca', 'Daniela', 'dana_arm@yahoo.com', 6000);
+
+INSERT INTO PARTICIPANTI
+VALUES (participanti_seq.nextval, 'Armeanca', 'Daniel', 'dani_arm@yahoo.com', 6001);
+
+INSERT INTO PARTICIPANTI
+VALUES (participanti_seq.nextval, 'Ion', 'Stefan', 'ionstef@yahoo.com', 6002);
+
+INSERT INTO PARTICIPANTI
+VALUES (participanti_seq.nextval, 'Ion', 'Sofia', 'sofiii@gmail.com', 6003);
+
+INSERT INTO PARTICIPANTI
+VALUES (participanti_seq.nextval, 'Dumitrache', 'Marius', 'dumyy80@gmail.com', 6004);
+
+commit;
+SELECT * FROM PARTICIPANTI;
+
+
+-----VORBITORI_DISCURSURI_EVENIMENTE---------------
+-------VORBITORI_DISCURSURI_EVENIMENTE: id_vorbitor(PK, FK1), id_discurs(PK, FK2), id_eveniment(PK, FK3)
+
+CREATE TABLE VORBITORI_DISCURSURI_EVENIMENTE
+(
+    id_vorbitor NUMBER(5) CONSTRAINT pk_c_vorbitor REFERENCES VORBITORI(id_vorbitor),
+    id_discurs NUMBER(5) CONSTRAINT pk_c_discurs REFERENCES DISCURSURI(id_discurs),
+    id_eveniment NUMBER(5) CONSTRAINT pk_c_eveniment REFERENCES EVENIMENTE(id_eveniment),
+    CONSTRAINT pk_compus_vde PRIMARY KEY (id_vorbitor,id_discurs,id_eveniment )
+);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1000, 5000, 6000);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1001, 5001, 6001);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1002, 5002, 6002);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1003, 5003, 6003);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1004, 5004, 6004);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1000, 5000, 6004);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1001, 5001, 6003);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1002, 5003, 6002);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1003, 5003, 6001);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1004, 5004, 6000);
+
+INSERT INTO VORBITORI_DISCURSURI_EVENIMENTE
+values (1001, 5004, 6002);
+
+commit;
+select * from VORBITORI_DISCURSURI_EVENIMENTE;
+
+
+----------- RECENZII-----------------
+--RECENZII: id_recenzie (PK), id_participant(FK1), 
+--          (id_vorbitor, id_discurs, id_eveniment) (FK2), 
+--          rating, data, text
+
+
+CREATE SEQUENCE recenzii_seq
+START WITH 10000;
+
+
+CREATE TABLE RECENZII
+(
+    id_recenzie NUMBER(5) CONSTRAINT pk_recenzie PRIMARY KEY,
+    rating NUMBER (2) CONSTRAINT rating_recenzie NOT NULL,
+    data DATE CONSTRAINT data_recenzie NOT NULL,
+    text VARCHAR(255) CONSTRAINT text_recenzie NOT NULL,
+    id_vorbitor NUMBER(5),
+    id_discurs NUMBER(5),
+    id_eveniment NUMBER(5),
+    CONSTRAINT fk_recenzie_vde FOREIGN KEY (id_vorbitor, id_discurs, id_eveniment)
+        REFERENCES VORBITORI_DISCURSURI_EVENIMENTE (id_vorbitor, id_discurs, id_eveniment),
+    id_participant NUMBER(5),
+    CONSTRAINT fk_recenzie_part FOREIGN KEY(id_participant) REFERENCES PARTICIPANTI(id_participant)
+);
+
+INSERT INTO RECENZII
+VALUES(recenzii_seq.nextval, 10, TO_DATE('16-04-2025','dd-mm-yyyy'),
+        'Subiectele bine abordate.', 1000, 5000, 6000, 9001 );
+
+INSERT INTO RECENZII
+VALUES(recenzii_seq.nextval, 10, TO_DATE('26-04-2025','dd-mm-yyyy'),
+        'SUPERB.', 1001, 5001, 6001, 9002 );
+        
+INSERT INTO RECENZII
+VALUES(recenzii_seq.nextval, 6, TO_DATE('02-02-2025','dd-mm-yyyy'),
+        'MODEST...', 1002, 5002, 6002, 9003 );
+
+INSERT INTO RECENZII
+VALUES(recenzii_seq.nextval, 9, TO_DATE('16-03-2025','dd-mm-yyyy'),
+        'Extraordinar!', 1003, 5003, 6003, 9004 );
+
+INSERT INTO RECENZII
+VALUES(recenzii_seq.nextval, 8, TO_DATE('05-05-2025','dd-mm-yyyy'),
+        'Mi-a placut mult tema!!', 1004, 5004, 6004, 9005 );
+
+commit;
+select * from RECENZII;
+
+
+------------VORBITORI_CAZARI----------
+--VORBITORI_CAZARI: id_vorbitor(PK,FK1), id_cazare(PK, FK2)
+
+CREATE TABLE VORBITORI_CAZARI
+(
+    id_vorbitor NUMBER(5) CONSTRAINT pk_cc_vorbitor REFERENCES VORBITORI(id_vorbitor),
+    id_cazare NUMBER(5) CONSTRAINT pk_cc_cazare REFERENCES CAZARI(id_cazare),
+    CONSTRAINT pk_compus_vc PRIMARY KEY (id_vorbitor,id_cazare )
+);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1000, 2000);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1004, 2000);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1001, 2003);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1003, 2003);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1002, 2001);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1001, 2002);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1003, 2002);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1000, 2004);
+
+INSERT INTO VORBITORI_CAZARI
+VALUES (1001, 2001);
+
+
+------EVENIMENTE_SPONSORI--------
+--EVENIMENTE_SPONSORI: id_eveniment(PK, FK1), id_sponsor(PK, FK2), suma
+CREATE TABLE EVENIMENTE_SPONSORI
+(
+    id_eveniment NUMBER(5) CONSTRAINT pk_es_eveniment REFERENCES EVENIMENTE(id_eveniment),
+    id_sponsor NUMBER(5) CONSTRAINT pk_es_sponsor REFERENCES SPONSORI(id_sponsor),
+    CONSTRAINT pk_compus_es PRIMARY KEY (id_eveniment,id_sponsor ),
+    suma NUMBER(7) CONSTRAINT es_suma NOT NULL
+);
+
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6000, 7000, 12300);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6000, 7001, 120000);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6001, 7001, 12600);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6001, 7002, 62300);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6002, 7002, 1000000);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6002, 7003, 990000);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6003, 7003, 22300);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6003, 7004, 22222);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6004, 7004, 32300);
+
+INSERT INTO EVENIMENTE_SPONSORI
+VALUES(6004, 7000, 33333);
+
